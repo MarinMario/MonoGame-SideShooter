@@ -14,7 +14,7 @@ namespace SideScrollerShooter
         [STAThread]
         static void Main()
         {
-            using (var game = new SideScrollerShooter())
+            using (var game = new SideShooter())
                 game.Run();
         }
     }

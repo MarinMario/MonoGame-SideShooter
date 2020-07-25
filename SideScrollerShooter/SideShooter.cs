@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace SideScrollerShooter
 {
@@ -9,8 +10,10 @@ namespace SideScrollerShooter
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Texture2D playerTexture;
         Player player;
+
+        Texture2D bulletTexture;
+        List<Bullet> bullets = new List<Bullet>();
 
         public SideShooter()
         {
@@ -28,8 +31,10 @@ namespace SideScrollerShooter
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            playerTexture = Content.Load<Texture2D>("Player");
+            Texture2D playerTexture = Content.Load<Texture2D>("Player");
             player = new Player(playerTexture, new Vector2(100, 100));
+
+            bulletTexture = Content.Load<Texture2D>("Bullet");
         }
 
         protected override void UnloadContent()
@@ -41,7 +46,13 @@ namespace SideScrollerShooter
         {
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            player.Update(delta);
+            player.Update(delta, bulletTexture, bullets);
+            for (int bulletIndex = 0; bulletIndex < bullets.Count; bulletIndex++)
+            {
+                bullets[bulletIndex].Update(delta);
+                if (bullets[bulletIndex].position.X > GraphicsDevice.Viewport.Width)
+                    bullets.RemoveAt(bulletIndex);
+            }
 
             base.Update(gameTime);
         }
@@ -52,6 +63,8 @@ namespace SideScrollerShooter
 
             spriteBatch.Begin();
 
+            foreach (Bullet bullet in bullets)
+                bullet.Draw(spriteBatch);
             player.Draw(spriteBatch);
 
             spriteBatch.End();

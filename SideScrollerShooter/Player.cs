@@ -18,13 +18,15 @@ namespace SideScrollerShooter
         int acceleration = 600;
         int friction = 1000;
 
+        float shootTimer = 0f;
+
         public Player(Texture2D _texture, Vector2 _position)
         {
             texture = _texture;
             position = _position;
         }
 
-        public void Update(float delta)
+        public void Update(float delta, Texture2D bulletTexture, List<Bullet> bullets)
         {
             Vector2 inputVector = Vector2.Zero;
             if (Keyboard.GetState().IsKeyDown(Keys.D))
@@ -45,6 +47,13 @@ namespace SideScrollerShooter
                 velocity += MoveVector(velocity, Vector2.Zero, friction * delta);
 
             position += velocity * delta;
+
+            shootTimer += delta;
+            if (Keyboard.GetState().IsKeyDown(Keys.Enter) && shootTimer > 0.3)
+            {
+                Shoot(bullets, bulletTexture);
+                shootTimer = 0f;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -58,6 +67,11 @@ namespace SideScrollerShooter
             if (vector != target)
                 return direction * amount;
             return Vector2.Zero;
+        }
+
+        private void Shoot(List<Bullet> bullets, Texture2D texture)
+        {
+            bullets.Add(new Bullet(texture, position));
         }
     }
 }

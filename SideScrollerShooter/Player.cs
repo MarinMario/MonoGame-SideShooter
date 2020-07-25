@@ -12,8 +12,11 @@ namespace SideScrollerShooter
     class Player
     {
         Texture2D texture;
-        Vector2 position;
+        public Vector2 position;
+        Vector2 velocity = Vector2.Zero;
         int speed = 300;
+        int acceleration = 600;
+        int friction = 1000;
 
         public Player(Texture2D _texture, Vector2 _position)
         {
@@ -23,7 +26,7 @@ namespace SideScrollerShooter
 
         public void Update(float delta)
         {
-            Vector2 inputVector = new Vector2(0, 0);
+            Vector2 inputVector = Vector2.Zero;
             if (Keyboard.GetState().IsKeyDown(Keys.D))
                 inputVector.X = 1;
             if (Keyboard.GetState().IsKeyDown(Keys.A))
@@ -33,15 +36,28 @@ namespace SideScrollerShooter
             if (Keyboard.GetState().IsKeyDown(Keys.S))
                 inputVector.Y = 1;
 
-            if (inputVector != new Vector2(0, 0))
-                inputVector.Normalize();
+            if (inputVector != Vector2.Zero)
+            {
+                inputVector /= inputVector.Length();
+                velocity += MoveVector(velocity, inputVector * speed, acceleration * delta);
+            }
+            else
+                velocity += MoveVector(velocity, Vector2.Zero, friction * delta);
 
-            position += inputVector * speed * delta;
+            position += velocity * delta;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, position, Color.White);
+        }
+
+        private Vector2 MoveVector(Vector2 vector, Vector2 target, float amount)
+        {
+            Vector2 direction = (target - vector) / (target - vector).Length();
+            if (vector != target)
+                return direction * amount;
+            return Vector2.Zero;
         }
     }
 }

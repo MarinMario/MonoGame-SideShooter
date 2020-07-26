@@ -16,7 +16,7 @@ namespace SideScrollerShooter
         Vector2 velocity = Vector2.Zero;
         int speed = 300;
         int acceleration = 600;
-        int friction = 1000;
+        int friction = 900;
 
         float shootTimer = 0f;
 
@@ -43,11 +43,13 @@ namespace SideScrollerShooter
                 inputVector /= inputVector.Length();
                 velocity += MoveVector(velocity, inputVector * speed, acceleration * delta);
             }
-            else
+            else if (velocity.LengthSquared() > 50f)
                 velocity += MoveVector(velocity, Vector2.Zero, friction * delta);
+            else
+                velocity = Vector2.Zero;
 
             position += velocity * delta;
-
+    
             shootTimer += delta;
             if (Keyboard.GetState().IsKeyDown(Keys.Enter) && shootTimer > 0.3)
             {

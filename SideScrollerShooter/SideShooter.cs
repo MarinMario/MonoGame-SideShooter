@@ -19,6 +19,8 @@ namespace SideScrollerShooter
         Texture2D enemyTexture;
         List<Enemy> enemies = new List<Enemy>();
 
+        Texture2D colliderTexture;
+
         public SideShooter()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -40,6 +42,7 @@ namespace SideScrollerShooter
 
             bulletTexture = Content.Load<Texture2D>("Bullet");
             enemyTexture = Content.Load<Texture2D>("Enemy");
+            colliderTexture = Content.Load<Texture2D>("Collider");
         }
 
         protected override void UnloadContent()
@@ -53,20 +56,23 @@ namespace SideScrollerShooter
 
             player.Update(delta, bulletTexture, bullets);
 
-            for (int i = 0; i < bullets.Count; i++)
+            foreach(Bullet bullet in bullets)
             {
-                bullets[i].Update(delta);
-                if (bullets[i].position.X > GraphicsDevice.Viewport.Width)
-                    bullets.RemoveAt(i);
+                bullet.Update(delta);
+                if (bullet.position.X > GraphicsDevice.Viewport.Width)
+                    bullet.shouldDespawn = true;
             }
 
-            SpawnEnemy(delta);
-            for (int i = 0; i < enemies.Count; i++)
+            foreach(Enemy enemy in enemies)
             {
-                enemies[i].Update(delta);
-                if (enemies[i].position.X < -100)
-                    enemies.RemoveAt(i);
+                enemy.Update(delta);
+                if (enemy.position.X < -100)
+                    enemy.shouldDespawn = true;
             }
+
+            CheckCollision();
+            SpawnEnemy(delta);
+            Despawn();
 
             base.Update(gameTime);
         }
@@ -78,10 +84,18 @@ namespace SideScrollerShooter
             spriteBatch.Begin();
 
             foreach (Bullet bullet in bullets)
+            {
                 bullet.Draw(spriteBatch);
+                bullet.collider.Draw(spriteBatch, colliderTexture);
+            }
+
             foreach (Enemy enemy in enemies)
+            {
                 enemy.Draw(spriteBatch);
+                enemy.collider.Draw(spriteBatch, colliderTexture);
+            }
             player.Draw(spriteBatch);
+            player.collider.Draw(spriteBatch, colliderTexture);
 
             spriteBatch.End();
 
@@ -100,6 +114,32 @@ namespace SideScrollerShooter
                 enemySpawnTimer = 0;
             }
 
+        }
+
+        private void CheckCollision()
+        {
+            foreach (Enemy enemy in enemies)
+            {
+                if (Collider.Overlaps(player.collider, enemy.collider))
+                    enemy.shouldDespawn = true;
+
+                foreach (Bullet bullet in bullets)
+                    if (Collider.Overlaps(bullet.collider, enemy.collider))
+                    {
+                        bullet.shouldDespawn = true;
+                        enemy.shouldDespawn = true;
+                    }
+            }
+        }
+
+        private void Despawn()
+        {
+            for (int i = 0; i < enemies.Count; i++)
+                if (enemies[i].shouldDespawn)
+                    enemies.RemoveAt(i);
+            for (int i = 0; i < bullets.Count; i++)
+                if (bullets[i].shouldDespawn)
+                    bullets.RemoveAt(i);
         }
     }
 }

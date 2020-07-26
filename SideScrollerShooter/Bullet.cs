@@ -13,6 +13,9 @@ namespace SideScrollerShooter
         Texture2D texture;
         public Vector2 position;
         int speed = 1000;
+        public bool shouldDespawn = false;
+
+        public Collider collider = new Collider();
 
         public Bullet(Texture2D _texture, Vector2 _position)
         {
@@ -23,6 +26,8 @@ namespace SideScrollerShooter
         public void Update(float delta)
         {
             position.X += speed * delta;
+            collider.position = position;
+            collider.size = new Vector2(16);
         }
 
         public void Draw(SpriteBatch spriteBatch)

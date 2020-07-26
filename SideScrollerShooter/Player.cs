@@ -18,6 +18,8 @@ namespace SideScrollerShooter
         int acceleration = 600;
         int friction = 900;
 
+        public Collider collider = new Collider();
+
         float shootTimer = 0f;
 
         public Player(Texture2D _texture, Vector2 _position)
@@ -49,7 +51,9 @@ namespace SideScrollerShooter
                 velocity = Vector2.Zero;
 
             position += velocity * delta;
-    
+            collider.position = position;
+            collider.size = new Vector2(64);
+
             shootTimer += delta;
             if (Keyboard.GetState().IsKeyDown(Keys.Enter) && shootTimer > 0.3)
             {

@@ -20,6 +20,10 @@ namespace SideScrollerShooter
         List<Enemy> enemies = new List<Enemy>();
 
         Texture2D colliderTexture;
+        SpriteFont font;
+
+        int score = 0;
+        Vector2 initialPlayerPos;
 
         public SideShooter()
         {
@@ -38,11 +42,13 @@ namespace SideScrollerShooter
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             Texture2D playerTexture = Content.Load<Texture2D>("Player");
-            player = new Player(playerTexture, new Vector2(100, 100));
+            initialPlayerPos = new Vector2(100, GraphicsDevice.Viewport.Height / 2);
+            player = new Player(playerTexture, initialPlayerPos);
 
             bulletTexture = Content.Load<Texture2D>("Bullet");
             enemyTexture = Content.Load<Texture2D>("Enemy");
             colliderTexture = Content.Load<Texture2D>("Collider");
+            font = Content.Load<SpriteFont>("Arial");
         }
 
         protected override void UnloadContent()
@@ -84,18 +90,13 @@ namespace SideScrollerShooter
             spriteBatch.Begin();
 
             foreach (Bullet bullet in bullets)
-            {
                 bullet.Draw(spriteBatch);
-                bullet.collider.Draw(spriteBatch, colliderTexture);
-            }
-
             foreach (Enemy enemy in enemies)
-            {
                 enemy.Draw(spriteBatch);
-                enemy.collider.Draw(spriteBatch, colliderTexture);
-            }
+
+            spriteBatch.DrawString(font, $"Score: {score}", new Vector2(10, 10), Color.White);
+
             player.Draw(spriteBatch);
-            player.collider.Draw(spriteBatch, colliderTexture);
 
             spriteBatch.End();
 
@@ -121,13 +122,18 @@ namespace SideScrollerShooter
             foreach (Enemy enemy in enemies)
             {
                 if (Collider.Overlaps(player.collider, enemy.collider))
+                {
                     enemy.shouldDespawn = true;
+                    score = 0;
+                    player.position = initialPlayerPos;
+                }
 
                 foreach (Bullet bullet in bullets)
                     if (Collider.Overlaps(bullet.collider, enemy.collider))
                     {
                         bullet.shouldDespawn = true;
                         enemy.shouldDespawn = true;
+                        score += 1;
                     }
             }
         }
